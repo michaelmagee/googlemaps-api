@@ -44,6 +44,9 @@ function repoInformationHTML(repos) {
 
 }
 function fetchGitHubInformation(event) {
+    // Clear out an old data
+    $("#gh-user-data").html("");
+    $("#gh-repo-data").html(""); 
 
     var username = $("#gh-username").val();  // grab ID from box. 
 
@@ -79,7 +82,7 @@ function fetchGitHubInformation(event) {
         }, function (errorResponse) {                // this is the error handler 
             if (errorResponse.status === 404) {     // not found
                 $("#gh-user-data").html(
-                    `<h2>No info found got user: ${username}</h2}`);
+                    `<h2>No info found for user: ${username}</h2}`);
             } else {
                 console.log(errorResponse);
                 $("#gh-user-data").html(
@@ -87,3 +90,7 @@ function fetchGitHubInformation(event) {
             }
         })
 }
+
+
+// As soon as the doc is loaded, fire it with the default user (michaelmagee) 
+$(document).ready(fetchGitHubInformation);
