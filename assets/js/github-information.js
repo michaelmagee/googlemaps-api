@@ -32,7 +32,7 @@ function repoInformationHTML(repos) {
         `
     });  // end of the iteration
 
-        // NOTE: Join adds this text to the end of each array element
+    // NOTE: Join adds this text to the end of each array element
     return `<div class="clearfix repo-list">
             <p> 
                 <strong>Repo List:</strong>
@@ -46,7 +46,7 @@ function repoInformationHTML(repos) {
 function fetchGitHubInformation(event) {
     // Clear out an old data
     $("#gh-user-data").html("");
-    $("#gh-repo-data").html(""); 
+    $("#gh-repo-data").html("");
 
     var username = $("#gh-username").val();  // grab ID from box. 
 
@@ -83,6 +83,14 @@ function fetchGitHubInformation(event) {
             if (errorResponse.status === 404) {     // not found
                 $("#gh-user-data").html(
                     `<h2>No info found for user: ${username}</h2}`);
+            } else if (errorResponse.status === 403) {
+                // The 403 is "forbidden" and may indicate potential throttling
+                // Address this by using the API's suggested retry target time. 
+                // it's returned as a unix timestamp and multiply it by 1000 (says the class)
+                var resetTime = new Date(errorResponse.getResonseHeader("X-rateLimit-reset") * 1000);
+                $("gh-user-data").html(
+                    `<h4>Too many requests, please wait until ${resetTime.toLocaleTimeString()}</h4>`
+                );
             } else {
                 console.log(errorResponse);
                 $("#gh-user-data").html(
