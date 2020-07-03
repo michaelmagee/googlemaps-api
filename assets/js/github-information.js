@@ -17,6 +17,32 @@ function userInformationHTML(user) {
                 </div>`;
 }
 
+
+
+// Process Repository json -> html in DOM 
+function repoInformationHTML(repos) {
+    if (repos.length == 0) {
+        return `<div class = "clearfix repo-list">No Repos! </div>`;
+    }
+
+    var listItemsHTML = repos.map(function (repo) {
+        return `<li> 
+        <a href="${repo.html_url}" target = "_blank">${repo.name}</a>
+        </li>
+        `
+    });  // end of the iteration
+
+        // NOTE: Join adds this text to the end of each array element
+    return `<div class="clearfix repo-list">
+            <p> 
+                <strong>Repo List:</strong>
+            </p>
+            <ul>
+                ${listItemsHTML.join("\n")}  
+            </ul>
+        </div>`;
+
+}
 function fetchGitHubInformation(event) {
 
     var username = $("#gh-username").val();  // grab ID from box. 
@@ -36,14 +62,20 @@ function fetchGitHubInformation(event) {
 
 
     // use a promise to  get the data for the user name provided.
+    // Look at the rirst response, second response.
+    // When multiple calls are made, the when() mthod packs a response up into arrays
+    // Each one is the forst element of the arra, so get the first one
 
     $.when(
-        $.getJSON(`https://api.github.com/users/${username}`)
+        $.getJSON(`https://api.github.com/users/${username}`),
+        $.getJSON(`https://api.github.com/users/${username}/repos`)
 
     ).then(   // This processes most errors but is succcess calls userInformationHTML to put data in DOM
-        function (response) {
-            var userData = response;
+        function (firstResponse, secondResponse) {
+            var userData = firstResponse[0];
+            var repoData = secondResponse[0];
             $("#gh-user-data").html(userInformationHTML(userData));  // json to html
+            $("#gh-repo-data").html(repoInformationHTML(repoData));  // json to html
         }, function (errorResponse) {                // this is the error handler 
             if (errorResponse.status === 404) {     // not found
                 $("#gh-user-data").html(
